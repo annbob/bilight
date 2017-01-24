@@ -5,6 +5,8 @@ This is a work in progress, it's very likely I will expand on this app in the ne
 
 Available at https://play.google.com/store/apps/details?id=com.jaspergoes.bilight
 
+Like this project? Help me get Milights by making a donation :) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PJ6SSTP5KBHKS)
+
 ### Screenshot of version at 24th of January 2017
 
 ![Screenshot](https://github.com/JasperG/bilight/blob/master/screenshot.png)
