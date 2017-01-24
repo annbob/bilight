@@ -3,6 +3,8 @@ An Android application that controls RGBW and RGBWW lightbulbs at the same time,
 
 This is a work in progress, it's very likely I will expand on this app in the near future (or even hours).
 
+Available at https://play.google.com/store/apps/details?id=com.jaspergoes.bilight
+
 ### Screenshot of version at 24th of January 2017
 
 ![Screenshot](https://github.com/JasperG/bilight/blob/master/screenshot.png)
