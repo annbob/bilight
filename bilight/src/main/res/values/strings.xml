@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Bilight</string>
+    <string name="brightness">Brightness</string>
+    <string name="saturation">Saturation</string>
+    <string name="rgbww_only">RGBWW bulbs only</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="wifi_bridge">WiFi Bridge</string>
+    <string name="zone_1">1</string>
+    <string name="zone_2">2</string>
+    <string name="zone_3">3</string>
+    <string name="zone_4">4</string>
+    <string name="zones">Zones</string>
+    <string name="white">White</string>
+</resources>
