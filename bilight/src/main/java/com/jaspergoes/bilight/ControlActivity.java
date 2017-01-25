@@ -28,7 +28,7 @@ public class ControlActivity extends AppCompatActivity {
         setContentView(R.layout.activity_control);
 
         Toolbar supportActionBar = (Toolbar) findViewById(R.id.toolbar);
-        supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + (Controller.milightPort != Controller.defaultMilightPort ? ":" + Integer.toString(Controller.milightPort) : "") + " " + getString(R.string.via) + " " + Controller.networkInterfaceName);
+        supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + (Controller.milightPort != Controller.defaultMilightPort ? ":" + Integer.toString(Controller.milightPort) : "") + (Controller.networkInterfaceName.length() > 0 ? " " + getString(R.string.via) + " " + Controller.networkInterfaceName : ""));
         setSupportActionBar(supportActionBar);
 
         setCheckboxes();

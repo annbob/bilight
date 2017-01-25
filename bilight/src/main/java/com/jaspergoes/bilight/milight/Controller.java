@@ -94,6 +94,7 @@ public class Controller {
 
     public void discoverNetworks(final Context context) {
 
+        networkInterfaceName = "";
         milightDevices.clear();
         isConnecting = true;
 
