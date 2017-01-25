@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Bilight</string>
+    <string name="brightness">Luminosité</string>
+    <string name="saturation">Saturation</string>
+    <string name="rgbww_only">Seulement RGBWW-ampoules</string>
+    <string name="on">Allumer</string>
+    <string name="off">Éteindre</string>
+    <string name="wifi_bridge">Pont WiFi</string>
+    <string name="zone_1">1</string>
+    <string name="zone_2">2</string>
+    <string name="zone_3">3</string>
+    <string name="zone_4">4</string>
+    <string name="zones">Zones</string>
+    <string name="white">Blanc</string>
+    <string name="help">Dider</string>
+    <string name="via">via</string>
+    <string name="no_milight_devices_found_yet">Aucun de dispositifs de Milight n'a encore été trouvé.</string>
+</resources>
