@@ -135,7 +135,7 @@ public class Controller {
         }
 
         /* DEBUG */
-        milightDevices.add(new Device("192.168.2.8", "SomeMac"));
+        //milightDevices.add(new Device("192.168.2.8", "SomeMac"));
 
         /* Nothing found */
         context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
