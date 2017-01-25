@@ -1,5 +1,18 @@
 <resources>
     <string name="app_name">Bilight</string>
+
+    <!-- Yet to translate -->
+    <string name="ipaddress_hostname">IP address / Hostname</string>
+    <string name="connect">Connect</string>
+    <string name="local_devices">Local Devices</string>
+    <string name="remote_devices">Remote Devices</string>
+    <string name="add_remote_device">Add Remote Device</string>
+    <string name="add_remote_device_summary">Specify an IP address and Port to connect to a Milight device remotely.</string>
+    <string name="remote_instructions">To use this, you need to forward incoming UDP packets on your router to the local IP address of your Milight iBox1 or iBox2 at port 5987.\nFor now; After pressing the "Connect" button, the connection will be saved to the list *only* if a connection could be established.</string>
+    <string name="discover_attempt">Please wait. Discovering, or, attempting connection..\nMax 16 seconds for a local iBox to respond.</string>
+
+    <!-- Already translated -->
+    <string name="port">Port</string>
     <string name="brightness">Brightness</string>
     <string name="saturation">Saturation</string>
     <string name="rgbww_only">RGBWW bulbs only</string>

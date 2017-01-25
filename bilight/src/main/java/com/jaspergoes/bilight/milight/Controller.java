@@ -2,10 +2,16 @@ package com.jaspergoes.bilight.milight;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.jaspergoes.bilight.helpers.Constants;
 import com.jaspergoes.bilight.milight.objects.Device;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -27,9 +33,6 @@ public class Controller {
     /* Socket, used entire app session long */
     private static DatagramSocket socket;
 
-    /* Controller device port - declared final to help compiler inline port number (I expect this port number to never change for v6 devices) */
-    private static final int milightPort = 5987;
-
     /* Local port to bind to - declared final to help compiler inline port number */
     private static final int localPort = 52123;
 
@@ -50,8 +53,14 @@ public class Controller {
     /* Controller device addr */
     public static InetAddress milightAddress;
 
+    /* Port to use, in case of remote access */
+    public static int milightPort = 5987;
+
+    /* Controller device port - declared final to help compiler inline port number (I expect this port number to never change for v6 devices) */
+    public static final int defaultMilightPort = 5987;
+
     /* String formatted password */
-    public static String milightPassword = "";
+    //public static String milightPassword = "";
 
     /* List of all found wifi bridges */
     public static ArrayList<Device> milightDevices = new ArrayList<Device>();
@@ -60,7 +69,7 @@ public class Controller {
     public volatile static boolean isConnecting;
 
     /* Whether we are connected */
-    public volatile static boolean isConnected;
+    private volatile static boolean isConnected;
 
     /* New color, brightness and saturation values to be submitted */
     public volatile static int newColor = -1;
@@ -74,7 +83,6 @@ public class Controller {
 
     /* Name of the network interface in use */
     public volatile static String networkInterfaceName = "";
-    public volatile static boolean networkInterfaceBound = false;
 
     /* The user-selection of devices and zones to be controlling */
     public static int[] controlDevices = new int[]{8, 7, 0};
@@ -87,6 +95,7 @@ public class Controller {
     public void discoverNetworks(final Context context) {
 
         milightDevices.clear();
+        isConnecting = true;
 
         int triedInterfaces = 0;
 
@@ -107,7 +116,7 @@ public class Controller {
                     if (!localAddress.getClass().getSimpleName().equals("Inet4Address") || broadcastAddress == null)
                         continue;
 
-                    networkInterfaceBound = false;
+                    //networkInterfaceBound = false;
                     networkInterfaceName = networkInterface.getDisplayName() + " ( " + localAddress.getHostAddress() + " )";
                     context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
@@ -117,11 +126,9 @@ public class Controller {
 
                     if (milightDevices.size() > 0) {
 
-                        /* If we've found only one single device, just connect */
-                        if (milightDevices.size() == 1)
-                            setDevice(milightDevices.get(0).addrIP, context);
+                        isConnecting = false;
+                        context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
-                        /* Stop this discovery cycle */
                         return;
 
                     }
@@ -135,21 +142,22 @@ public class Controller {
         }
 
         /* DEBUG */
-        //milightDevices.add(new Device("192.168.2.8", "SomeMac"));
+        //milightDevices.add(new Device("145.133.79.217", "MA:CA:DD:RE:SS", 5900));
 
         /* Nothing found */
+        isConnecting = false;
         context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
         if (triedInterfaces == 0) {
-            Log.e("BILIGHT", "No suitable IPv4 network interfaces found.");
-            System.exit(0);
+            Log.e("BILIGHT", "No suitable IPv4 network interfaces found for discovery cycle.");
+            //System.exit(0);
         } else if (milightDevices.size() == 0) {
-            if (socket != null) socket.close();
+            //if (socket != null) socket.close();
 
             //ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("ibox.png")));
             //JOptionPane.showMessageDialog(null, \n\nNote: You need a WiFi iBox1 ( v6 ) ( aka. \"WiFi Bridge v6\" ) from Controller / Applamp / LimitlessLED\nconnected to your network to use this application.\n\nRestart the application to retry discovery.\n\nTerminating.", WindowHelper.appTitle, JOptionPane.ERROR_MESSAGE, icon);
             Log.e("BILIGHT", "No WiFi iBox1 ( v6 ) could be found on your network, or, the device did not respond within 15 seconds.");
-            System.exit(0);
+            //System.exit(0);
 
         }
 
@@ -166,10 +174,10 @@ public class Controller {
         } catch (SocketException e) {
             //JOptionPane.showMessageDialog(null, "Could not bind to port " + Integer.toString(localPort) + " at " + localAddress.getHostAddress() + ".\nIs another instance of the application already running?\n\n" + e.toString() + "\n\nTerminating.", WindowHelper.appTitle, JOptionPane.ERROR_MESSAGE);
             Log.e("BILIGHT", "Could not bind to port " + Integer.toString(localPort) + " at " + localAddress.getHostAddress() + ".");
-            System.exit(0);
+            //System.exit(0);
         }
 
-        networkInterfaceBound = true;
+        //networkInterfaceBound = true;
 
         byte[] payload = new byte[]{(byte) 72, (byte) 70, (byte) 45, (byte) 65, (byte) 49, (byte) 49, (byte) 65, (byte) 83, (byte) 83, (byte) 73, (byte) 83, (byte) 84, (byte) 72, (byte) 82, (byte) 69, (byte) 65, (byte) 68};
 
@@ -220,7 +228,7 @@ public class Controller {
                             }
                         }
 
-                        milightDevices.add(new Device(discovery[0], discovery[1].replaceAll("(.{2})", "$1" + ':').substring(0, 17)));
+                        milightDevices.add(new Device(discovery[0], discovery[1].replaceAll("(.{2})", "$1" + ':').substring(0, 17), defaultMilightPort));
                         Collections.sort(milightDevices);
                         context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
@@ -236,9 +244,23 @@ public class Controller {
 
     }
 
-    public void setDevice(String address, Context context) {
+    public void setDevice(String address, int port, Context context) {
 
         isConnecting = true;
+
+        /* Close any previously opened socket */
+        if (socket != null) socket.close();
+
+		/* Bind new socket to any address - assuming android handles this right */
+        try {
+            socket = new DatagramSocket(localPort);
+        } catch (SocketException e) {
+            //JOptionPane.showMessageDialog(null, "Could not bind to port " + Integer.toString(localPort) + " at " + localAddress.getHostAddress() + ".\nIs another instance of the application already running?\n\n" + e.toString() + "\n\nTerminating.", WindowHelper.appTitle, JOptionPane.ERROR_MESSAGE);
+            Log.e("BILIGHT", "Could not bind to port " + Integer.toString(localPort) + ".");
+            //System.exit(0);
+        }
+
+        context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
         if (isConnected) {
 
@@ -258,6 +280,7 @@ public class Controller {
 
         try {
             milightAddress = InetAddress.getByName(address);
+            milightPort = port;
         } catch (UnknownHostException e) {
             /* This should never happen. Nasty empty catch blocks, I should know better. Oh, right, I do. */
         }
@@ -284,6 +307,43 @@ public class Controller {
 
 				/* Check if the packet came from the selected device, and the received response is as expected */
                 if (packet.getAddress().equals(milightAddress) && bytesToHex(buffer, packet.getLength()).indexOf("2800000011") == 0) {
+
+                    /* Check if this is a local device */
+                    boolean found = false;
+                    for (int i = 0; i < milightDevices.size(); i++) {
+                        if (milightDevices.get(i).addrIP.equals(milightAddress.getHostAddress())) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        String mac = bytesToHex(buffer, packet.getLength()).substring(14, 14 + 12).replaceAll("(.{2})", "$1" + ':').substring(0, 17);
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                        try {
+                            JSONArray remoteArray = new JSONArray(prefs.getString("remotes", "[]"));
+                            for (int i = 0; i < remoteArray.length(); i++) {
+                                JSONObject remote = remoteArray.getJSONObject(i);
+                                if (remote.getString("n").equals(milightAddress.getHostAddress())) {
+                                    remote.put("m", mac);
+                                    remoteArray.put(i, remote);
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                JSONObject n = new JSONObject();
+                                n.put("n", milightAddress.getHostAddress());
+                                n.put("m", mac);
+                                n.put("p", milightPort);
+                                remoteArray.put(n);
+                            }
+                            prefs.edit().putString("remotes", remoteArray.toString()).apply();
+                        } catch (JSONException e) {
+                            prefs.edit().putString("remotes", "[]").apply();
+                        }
+                    }
+
                     milightSessionByte1 = buffer[19];
                     milightSessionByte2 = buffer[20];
 
@@ -304,17 +364,20 @@ public class Controller {
 
         if (!isConnected) {
 
-            socket.close();
+            //socket.close();
 
             //ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("ibox.png")));
             //JOptionPane.showMessageDialog(null, "Could not establish a connection to the WiFi iBox1 ( v6 ) on your network within 10 seconds.\n\nRestart the application to retry.\n\nTerminating.", WindowHelper.appTitle, JOptionPane.ERROR_MESSAGE, icon);
             Log.e("BILIGHT", "Could not establish a connection to the WiFi iBox1 ( v6 ) on your network within 10 seconds.");
-            System.exit(0);
+            // System.exit(0);
 
+            isConnecting = false;
+            context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
+
+        } else {
+            /* Start keepalive thread */
+            startWorkerThread();
         }
-
-        /* Start keepalive thread */
-        startWorkerThread();
 
     }
 
@@ -351,7 +414,7 @@ public class Controller {
 
                             if (response.indexOf("8000000015") == 0 || response.indexOf("8000000021") == 0) {
 
-                                milightPassword = bytesToHex(new byte[]{buffer[16], buffer[17]}, 2);
+                                //milightPassword = bytesToHex(new byte[]{buffer[16], buffer[17]}, 2);
 
                                 milightPasswordByte1 = buffer[16];
                                 milightPasswordByte2 = buffer[17];
@@ -385,7 +448,7 @@ public class Controller {
 
     }
 
-    public void startWorkerThread() {
+    private void startWorkerThread() {
 
         new Thread() {
 
@@ -511,32 +574,6 @@ public class Controller {
 
     }
 
-    private void sendFrames(ArrayList<byte[]> payloads, int sleep) {
-
-        for (byte[] payload : payloads) {
-
-            try {
-
-                socket.send(new DatagramPacket(payload, 22, milightAddress, milightPort));
-
-				/* Wait 'sleep' milliseconds for previous RF command to propagate from iBox */
-                Thread.sleep(sleep);
-
-            } catch (IOException e) {
-
-                /* This should never happen, but, if it does, for whatever reason; There would be no need for
-                 * a followup Thread.sleep call, which will not be performed once this catch block has been reached */
-
-            } catch (InterruptedException e) {
-
-                /* This may happen, and I wouldn't care one byte */
-
-            }
-
-        }
-
-    }
-
     private byte[] buildColorPayload(int deviceGroup, int milightZone) {
         /* Each type of bulb has a different offset for the same position in the color spectrum.
          * List might be incomplete or (slightly) inaccurate. Improvements? Please pull.
@@ -619,6 +656,7 @@ public class Controller {
     }
 
     private byte[] buildWhitePayload(int group, int milightZone) {
+
         byte[] payload = new byte[]{(byte) 128, (byte) 0, (byte) 0, (byte) 0, (byte) 17, milightSessionByte1, milightSessionByte2, (byte) 0, (byte) (-128 + noOnce), (byte) 0, (byte) 49, milightPasswordByte1, milightPasswordByte2, (byte) group, (byte) (group == 8 ? 5 : 3), (byte) (group == 8 ? 100 : 5), (byte) 0, (byte) 0, (byte) 0, (byte) (group == 0 ? 0 : milightZone), (byte) 0, (byte) 0};
 
 		/* Checksum */
@@ -628,6 +666,7 @@ public class Controller {
         noOnce = (noOnce + 1) % 256;
 
         return payload;
+
     }
 
     public void setOnOff(boolean onOff) {
@@ -652,6 +691,7 @@ public class Controller {
     }
 
     private byte[] buildSwitchPayload(int group, int milightZone, boolean onOff) {
+
         byte[] payload = new byte[]{(byte) 128, (byte) 0, (byte) 0, (byte) 0, (byte) 17, milightSessionByte1, milightSessionByte2, (byte) 0, (byte) (-128 + noOnce), (byte) 0, (byte) 49, milightPasswordByte1, milightPasswordByte2, (byte) group, (byte) (group == 8 ? 4 : 3), (byte) (group == 0 ? (onOff ? 3 : 4) : (onOff ? 1 : 2)), (byte) 0, (byte) 0, (byte) 0, (byte) (group == 0 ? 0 : milightZone), (byte) 0, (byte) 0};
 
 		/* Checksum */
@@ -661,6 +701,7 @@ public class Controller {
         noOnce = (noOnce + 1) % 256;
 
         return payload;
+
     }
 
     public void refresh() {
@@ -671,6 +712,32 @@ public class Controller {
 
         synchronized (Controller.INSTANCE) {
             Controller.INSTANCE.notify();
+        }
+
+    }
+
+    private void sendFrames(ArrayList<byte[]> payloads, int sleep) {
+
+        for (byte[] payload : payloads) {
+
+            try {
+
+                socket.send(new DatagramPacket(payload, 22, milightAddress, milightPort));
+
+				/* Wait 'sleep' milliseconds for previous RF command to propagate from iBox */
+                Thread.sleep(sleep);
+
+            } catch (IOException e) {
+
+                /* This should never happen, but, if it does, for whatever reason; There would be no need for
+                 * a followup Thread.sleep call, which will not be performed once this catch block has been reached */
+
+            } catch (InterruptedException e) {
+
+                /* This may happen, and I wouldn't care one byte */
+
+            }
+
         }
 
     }

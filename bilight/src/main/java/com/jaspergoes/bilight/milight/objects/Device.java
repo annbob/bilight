@@ -4,10 +4,12 @@ public class Device implements Comparable<Device> {
 
     public final String addrIP;
     public final String addrMAC;
+    public final int addrPort;
 
-    public Device(String addrIP, String addrMAC) {
+    public Device(String addrIP, String addrMAC, int addrPort) {
         this.addrIP = addrIP;
         this.addrMAC = addrMAC;
+        this.addrPort = addrPort;
     }
 
     @Override

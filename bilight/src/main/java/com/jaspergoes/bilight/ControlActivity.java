@@ -28,96 +28,10 @@ public class ControlActivity extends AppCompatActivity {
         setContentView(R.layout.activity_control);
 
         Toolbar supportActionBar = (Toolbar) findViewById(R.id.toolbar);
-        supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + " " + getString(R.string.via) + " " + Controller.networkInterfaceName);
-
+        supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + (Controller.milightPort != Controller.defaultMilightPort ? ":" + Integer.toString(Controller.milightPort) : "") + " " + getString(R.string.via) + " " + Controller.networkInterfaceName);
         setSupportActionBar(supportActionBar);
 
-        /* Set checkboxes, according to values currently stored in Controller */
-        for (int i : Controller.controlDevices) {
-            if (i == 0) {
-                ((AppCompatCheckBox) findViewById(R.id.control_wifi_bridge)).setChecked(true);
-            } else if (i == 7) {
-                for (int x : Controller.controlZones) {
-                    if (x == -1) {
-                        break;
-                    } else if (x == 0) {
-                        ((AppCompatCheckBox) findViewById(R.id.control_zone_1)).setChecked(true);
-                        ((AppCompatCheckBox) findViewById(R.id.control_zone_2)).setChecked(true);
-                        ((AppCompatCheckBox) findViewById(R.id.control_zone_3)).setChecked(true);
-                        ((AppCompatCheckBox) findViewById(R.id.control_zone_4)).setChecked(true);
-                    } else {
-                        switch (x) {
-                            case 1:
-                                ((AppCompatCheckBox) findViewById(R.id.control_zone_1)).setChecked(true);
-                                break;
-                            case 2:
-                                ((AppCompatCheckBox) findViewById(R.id.control_zone_2)).setChecked(true);
-                                break;
-                            case 3:
-                                ((AppCompatCheckBox) findViewById(R.id.control_zone_3)).setChecked(true);
-                                break;
-                            case 4:
-                                ((AppCompatCheckBox) findViewById(R.id.control_zone_4)).setChecked(true);
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-
-        AppCompatCheckBox.OnCheckedChangeListener changeListener = new AppCompatCheckBox.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                boolean wifi = ((AppCompatCheckBox) findViewById(R.id.control_wifi_bridge)).isChecked();
-                boolean all = ((AppCompatCheckBox) findViewById(R.id.control_zone_1)).isChecked() && ((AppCompatCheckBox) findViewById(R.id.control_zone_2)).isChecked() && ((AppCompatCheckBox) findViewById(R.id.control_zone_3)).isChecked() && ((AppCompatCheckBox) findViewById(R.id.control_zone_4)).isChecked();
-                if (wifi && all) {
-                    Controller.controlDevices = new int[]{8, 7, 0};
-                    Controller.controlZones = new int[]{0};
-                } else if (all) {
-                    Controller.controlDevices = new int[]{8, 7};
-                    Controller.controlZones = new int[]{0};
-                } else {
-                    boolean any = ((AppCompatCheckBox) findViewById(R.id.control_zone_1)).isChecked() || ((AppCompatCheckBox) findViewById(R.id.control_zone_2)).isChecked() || ((AppCompatCheckBox) findViewById(R.id.control_zone_3)).isChecked() || ((AppCompatCheckBox) findViewById(R.id.control_zone_4)).isChecked();
-                    if (any) {
-
-                        List<Integer> zoneList = new ArrayList<Integer>();
-
-                        if (((AppCompatCheckBox) findViewById(R.id.control_zone_1)).isChecked())
-                            zoneList.add(1);
-                        if (((AppCompatCheckBox) findViewById(R.id.control_zone_2)).isChecked())
-                            zoneList.add(2);
-                        if (((AppCompatCheckBox) findViewById(R.id.control_zone_3)).isChecked())
-                            zoneList.add(3);
-                        if (((AppCompatCheckBox) findViewById(R.id.control_zone_4)).isChecked())
-                            zoneList.add(4);
-
-                        if (wifi) {
-                            Controller.controlDevices = new int[]{8, 7, 0};
-                        } else {
-                            Controller.controlDevices = new int[]{8, 7};
-                        }
-
-                        int[] ret = new int[zoneList.size()];
-                        for (int i = 0; i < ret.length; i++) ret[i] = zoneList.get(i);
-
-                        Controller.controlZones = ret;
-
-                    } else if (wifi) {
-                        Controller.controlDevices = new int[]{0};
-                        Controller.controlZones = new int[]{-1};
-                    } else {
-                        /* None selected, at all */
-                        Controller.controlDevices = new int[]{};
-                        Controller.controlZones = new int[]{-1};
-                    }
-                }
-            }
-        };
-        ((AppCompatCheckBox) findViewById(R.id.control_wifi_bridge)).setOnCheckedChangeListener(changeListener);
-        ((AppCompatCheckBox) findViewById(R.id.control_zone_1)).setOnCheckedChangeListener(changeListener);
-        ((AppCompatCheckBox) findViewById(R.id.control_zone_2)).setOnCheckedChangeListener(changeListener);
-        ((AppCompatCheckBox) findViewById(R.id.control_zone_3)).setOnCheckedChangeListener(changeListener);
-        ((AppCompatCheckBox) findViewById(R.id.control_zone_4)).setOnCheckedChangeListener(changeListener);
+        setCheckboxes();
 
         /* Switch on */
         ((Button) findViewById(R.id.switchOn)).setOnClickListener(new View.OnClickListener() {
@@ -195,24 +109,18 @@ public class ControlActivity extends AppCompatActivity {
             @Override
             public void refresh() {
 
-                new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-
-                        Controller.INSTANCE.refresh();
-
-                    }
-
-                }).start();
+                Controller.INSTANCE.refresh();
 
             }
 
         });
 
+        DiscreteSeekBar seekbar;
+
         /* Brightness */
-        ((DiscreteSeekBar) findViewById(R.id.seekbar_brightness)).setProgress(Controller.newColor == -1 ? 100 : Controller.newColor);
-        ((DiscreteSeekBar) findViewById(R.id.seekbar_brightness)).setOnProgressChangeListener(new OnProgressChangeListener() {
+        seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_brightness);
+        seekbar.setProgress(Controller.newColor == -1 ? 100 : Controller.newColor);
+        seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
 
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, final int value, boolean fromUser) {
@@ -230,8 +138,9 @@ public class ControlActivity extends AppCompatActivity {
         });
 
         /* Saturation */
-        ((DiscreteSeekBar) findViewById(R.id.seekbar_saturation)).setProgress(Controller.newSaturation == -1 ? 100 : Controller.newSaturation);
-        ((DiscreteSeekBar) findViewById(R.id.seekbar_saturation)).setOnProgressChangeListener(new OnProgressChangeListener() {
+        seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_saturation);
+        seekbar.setProgress(Controller.newSaturation == -1 ? 100 : Controller.newSaturation);
+        seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
 
             @Override
             public void onProgressChanged(DiscreteSeekBar seekBar, final int value, boolean fromUser) {
@@ -247,6 +156,102 @@ public class ControlActivity extends AppCompatActivity {
             }
 
         });
+
+    }
+
+    private void setCheckboxes() {
+
+        final AppCompatCheckBox wifi_0 = (AppCompatCheckBox) findViewById(R.id.control_wifi_bridge);
+        final AppCompatCheckBox zone_1 = (AppCompatCheckBox) findViewById(R.id.control_zone_1);
+        final AppCompatCheckBox zone_2 = (AppCompatCheckBox) findViewById(R.id.control_zone_2);
+        final AppCompatCheckBox zone_3 = (AppCompatCheckBox) findViewById(R.id.control_zone_3);
+        final AppCompatCheckBox zone_4 = (AppCompatCheckBox) findViewById(R.id.control_zone_4);
+
+         /* Set checkboxes, according to values currently stored in Controller */
+        for (int i : Controller.controlDevices) {
+            if (i == 0) {
+                wifi_0.setChecked(true);
+            } else if (i == 7) {
+                for (int x : Controller.controlZones) {
+                    if (x == -1) {
+                        break;
+                    } else if (x == 0) {
+                        zone_1.setChecked(true);
+                        zone_2.setChecked(true);
+                        zone_3.setChecked(true);
+                        zone_4.setChecked(true);
+                    } else {
+                        switch (x) {
+                            case 1:
+                                zone_1.setChecked(true);
+                                break;
+                            case 2:
+                                zone_2.setChecked(true);
+                                break;
+                            case 3:
+                                zone_3.setChecked(true);
+                                break;
+                            case 4:
+                                zone_4.setChecked(true);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        AppCompatCheckBox.OnCheckedChangeListener changeListener = new AppCompatCheckBox.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                boolean wifi = wifi_0.isChecked();
+                boolean all = zone_1.isChecked() && zone_2.isChecked() && zone_3.isChecked() && zone_4.isChecked();
+                if (wifi && all) {
+                    Controller.controlDevices = new int[]{8, 7, 0};
+                    Controller.controlZones = new int[]{0};
+                } else if (all) {
+                    Controller.controlDevices = new int[]{8, 7};
+                    Controller.controlZones = new int[]{0};
+                } else {
+                    boolean any = zone_1.isChecked() || zone_2.isChecked() || zone_3.isChecked() || zone_4.isChecked();
+                    if (any) {
+                        List<Integer> zoneList = new ArrayList<Integer>();
+
+                        if (zone_1.isChecked())
+                            zoneList.add(1);
+                        if (zone_2.isChecked())
+                            zoneList.add(2);
+                        if (zone_3.isChecked())
+                            zoneList.add(3);
+                        if (zone_4.isChecked())
+                            zoneList.add(4);
+
+                        if (wifi) {
+                            Controller.controlDevices = new int[]{8, 7, 0};
+                        } else {
+                            Controller.controlDevices = new int[]{8, 7};
+                        }
+
+                        int[] ret = new int[zoneList.size()];
+                        for (int i = 0; i < ret.length; i++) ret[i] = zoneList.get(i);
+
+                        Controller.controlZones = ret;
+                    } else if (wifi) {
+                        Controller.controlDevices = new int[]{0};
+                        Controller.controlZones = new int[]{-1};
+                    } else {
+                        /* None selected, at all */
+                        Controller.controlDevices = new int[]{};
+                        Controller.controlZones = new int[]{-1};
+                    }
+                }
+            }
+        };
+
+        wifi_0.setOnCheckedChangeListener(changeListener);
+        zone_1.setOnCheckedChangeListener(changeListener);
+        zone_2.setOnCheckedChangeListener(changeListener);
+        zone_3.setOnCheckedChangeListener(changeListener);
+        zone_4.setOnCheckedChangeListener(changeListener);
 
     }
 
