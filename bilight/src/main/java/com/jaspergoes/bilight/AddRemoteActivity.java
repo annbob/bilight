@@ -59,7 +59,7 @@ public class AddRemoteActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Controller.INSTANCE.setDevice(ip.getText().toString(), Integer.parseInt(port.getText().toString()), getApplicationContext());
+                        Controller.INSTANCE.setDevice(ip.getText().toString().trim(), Integer.parseInt(port.getText().toString().trim()), getApplicationContext());
                     }
                 }).start();
                 finish();
@@ -73,14 +73,14 @@ public class AddRemoteActivity extends AppCompatActivity {
         boolean valid = true;
         String t;
 
-        t = ip.getText().toString();
+        t = ip.getText().toString().trim();
         Pattern hostPattern = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
         Pattern ipPattern = Pattern.compile("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
         if (!hostPattern.matcher(t).matches() && !ipPattern.matcher(t).matches()) {
             valid = false;
         }
 
-        t = port.getText().toString();
+        t = port.getText().toString().trim();
         try {
             int unused = Integer.parseInt(t);
         } catch (NumberFormatException e) {
