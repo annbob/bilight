@@ -517,7 +517,7 @@ public class Controller {
 
                         if (payloads.size() > 0) {
 
-                            sendFrames(payloads, 50);
+                            sendFrames(payloads, 75);
                             payloads.clear();
 
                             keepAliveTime = System.currentTimeMillis() + 5000;
