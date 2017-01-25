@@ -44,7 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="6dp"
-                    android:layout_marginTop="7dp"
+                    android:layout_marginTop="6dp"
                     android:text="@string/zones" />
 
                 <android.support.v7.widget.AppCompatCheckBox
@@ -78,25 +78,24 @@
 
             </com.jaspergoes.bilight.helpers.HorizontalFlowLayout>
 
-            <com.jaspergoes.bilight.helpers.ColorPickerView
-                android:id="@+id/colorpicker"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal" />
+                android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
+                <com.jaspergoes.bilight.helpers.ColorPickerView
+                    android:id="@+id/colorpicker"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true" />
 
                 <Button
                     android:id="@+id/setWhite"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
                     android:text="@string/white" />
 
-            </LinearLayout>
+            </RelativeLayout>
 
             <TextView
                 android:layout_width="match_parent"

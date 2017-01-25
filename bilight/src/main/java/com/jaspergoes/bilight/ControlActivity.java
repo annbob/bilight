@@ -129,7 +129,7 @@ public class ControlActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        Controller.INSTANCE.switchOnOff(true);
+                        Controller.INSTANCE.setOnOff(true);
 
                     }
 
@@ -148,7 +148,7 @@ public class ControlActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        Controller.INSTANCE.switchOnOff(false);
+                        Controller.INSTANCE.setOnOff(false);
 
                     }
 
@@ -200,7 +200,7 @@ public class ControlActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        Controller.INSTANCE.sendRefresh();
+                        Controller.INSTANCE.refresh();
 
                     }
 

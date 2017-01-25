@@ -453,7 +453,7 @@ public class Controller {
 
                         if (payloads.size() > 0) {
 
-                            sendFrames(payloads);
+                            sendFrames(payloads, 50);
                             payloads.clear();
 
                             keepAliveTime = System.currentTimeMillis() + 5000;
@@ -511,7 +511,7 @@ public class Controller {
 
     }
 
-    private void sendFrames(ArrayList<byte[]> payloads) {
+    private void sendFrames(ArrayList<byte[]> payloads, int sleep) {
 
         for (byte[] payload : payloads) {
 
@@ -519,8 +519,8 @@ public class Controller {
 
                 socket.send(new DatagramPacket(payload, 22, milightAddress, milightPort));
 
-				/* Wait 50 milliseconds for previous RF command to propagate from iBox */
-                Thread.sleep(50);
+				/* Wait 'sleep' milliseconds for previous RF command to propagate from iBox */
+                Thread.sleep(sleep);
 
             } catch (IOException e) {
 
@@ -614,7 +614,7 @@ public class Controller {
             }
         }
 
-        sendFrames(payloads);
+        sendFrames(payloads, 100);
 
     }
 
@@ -630,7 +630,7 @@ public class Controller {
         return payload;
     }
 
-    public void switchOnOff(boolean onOff) {
+    public void setOnOff(boolean onOff) {
 
         int[] controlDevices = Controller.controlDevices;
         int[] controlZones = Controller.controlZones;
@@ -647,7 +647,7 @@ public class Controller {
             }
         }
 
-        sendFrames(payloads);
+        sendFrames(payloads, 100);
 
     }
 
@@ -663,7 +663,7 @@ public class Controller {
         return payload;
     }
 
-    public void sendRefresh() {
+    public void refresh() {
 
         lastColor = Integer.MAX_VALUE;
         lastBrightness = Integer.MAX_VALUE;

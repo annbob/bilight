@@ -34,12 +34,16 @@ public class MainActivity extends PreferenceActivityCompat {
 
                 final String addressIP = (String) this.getTitle();
 
+                Controller.isConnecting = true;
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         Controller.INSTANCE.setDevice(addressIP, getApplicationContext());
                     }
                 }).start();
+
+                updateList();
 
             }
 
@@ -132,11 +136,13 @@ public class MainActivity extends PreferenceActivityCompat {
         deviceList.setTitle(Controller.networkInterfaceName);
 
         boolean empty = true;
+        boolean maySelect = !Controller.isConnecting;
 
-		/* Re-populate the list with discovered devices */
+        /* Re-populate the list with discovered devices */
         for (Device device : Controller.milightDevices) {
             DevicePreference pref = new DevicePreference(this, device.addrIP, device.addrMAC);
             pref.setIcon(getResources().getDrawable(R.drawable.ic_bulb));
+            pref.setEnabled(maySelect);
             deviceList.addPreference(pref);
             empty = false;
         }

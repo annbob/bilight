@@ -32,6 +32,8 @@ public class ColorPickerView extends View {
     private int CENTER_RADIUS;
     private int MAX_HEIGHT = 0;
 
+    private static int color = 0xffff0000;
+
     public ColorPickerView(Context context) {
         this(context, null, 0);
     }
@@ -55,21 +57,7 @@ public class ColorPickerView extends View {
         if (resourceId > 0)
             satMaxHeight -= getResources().getDimensionPixelSize(resourceId);
 
-        MAX_HEIGHT = satMaxHeight;
-        /* Subtract 1 x padding from parent layout ( 6dp ) plus 1dp for border ( 7dp ) */
-        //MAX_HEIGHT = (int) (satMaxHeight - (7f * getResources().getDisplayMetrics().density));
-
-        a = context.getTheme().obtainStyledAttributes(
-                attrs,
-                R.styleable.ColorPickerView,
-                0, 0);
-
-        int color;
-        try {
-            color = a.getInteger(R.styleable.ColorPickerView_color, 0xffff0000);
-        } finally {
-            a.recycle();
-        }
+        MAX_HEIGHT = satMaxHeight - (int) (12f * getResources().getDisplayMetrics().density);
 
         mRadialPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mRadialPaint.setStyle(Paint.Style.FILL);
@@ -180,7 +168,7 @@ public class ColorPickerView extends View {
                         if (unit < 0) {
                             unit += 1;
                         }
-                        int color = interpColor(mColors, unit);
+                        color = interpColor(mColors, unit);
                         mCenterPaint.setColor(color);
 
                         float hsv[] = new float[3];
