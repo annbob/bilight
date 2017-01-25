@@ -26,7 +26,11 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_control);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
+        Toolbar supportActionBar = (Toolbar) findViewById(R.id.toolbar);
+        supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + " " + getString(R.string.via) + " " + Controller.networkInterfaceName);
+
+        setSupportActionBar(supportActionBar);
 
         /* Set checkboxes, according to values currently stored in Controller */
         for (int i : Controller.controlDevices) {
@@ -94,9 +98,7 @@ public class ControlActivity extends AppCompatActivity {
                         }
 
                         int[] ret = new int[zoneList.size()];
-                        for (int i = 0; i < ret.length; i++) {
-                            ret[i] = zoneList.get(i).intValue();
-                        }
+                        for (int i = 0; i < ret.length; i++) ret[i] = zoneList.get(i);
 
                         Controller.controlZones = ret;
 

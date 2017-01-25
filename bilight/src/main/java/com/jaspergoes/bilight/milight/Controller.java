@@ -27,9 +27,6 @@ public class Controller {
     /* Socket, used entire app session long */
     private static DatagramSocket socket;
 
-    /* Controller device addr */
-    private static InetAddress milightAddress;
-
     /* Controller device port - declared final to help compiler inline port number (I expect this port number to never change for v6 devices) */
     private static final int milightPort = 5987;
 
@@ -50,6 +47,9 @@ public class Controller {
     /* Static instance */
     public static Controller INSTANCE;
 
+    /* Controller device addr */
+    public static InetAddress milightAddress;
+
     /* String formatted password */
     public static String milightPassword = "";
 
@@ -62,11 +62,12 @@ public class Controller {
     /* Whether we are connected */
     public volatile static boolean isConnected;
 
-    /* New color and brightness values to be submitted */
+    /* New color, brightness and saturation values to be submitted */
     public volatile static int newColor = -1;
     public volatile static int newBrightness = -1;
     public volatile static int newSaturation = -1;
 
+    /* Last color, brightness and saturation values sent out */
     private static int lastColor = Integer.MAX_VALUE;
     private static int lastBrightness = Integer.MAX_VALUE;
     private static int lastSaturation = Integer.MAX_VALUE;
@@ -75,12 +76,17 @@ public class Controller {
     public volatile static String networkInterfaceName = "";
     public volatile static boolean networkInterfaceBound = false;
 
+    /* The user-selection of devices and zones to be controlling */
     public static int[] controlDevices = new int[]{8, 7, 0};
     public static int[] controlZones = new int[]{0};
 
-    public Controller(final Context context) {
-
+    public Controller() {
         INSTANCE = this;
+    }
+
+    public void discoverNetworks(final Context context) {
+
+        milightDevices.clear();
 
         int triedInterfaces = 0;
 
@@ -102,26 +108,18 @@ public class Controller {
                         continue;
 
                     networkInterfaceBound = false;
-                    networkInterfaceName = networkInterface.getDisplayName();
+                    networkInterfaceName = networkInterface.getDisplayName() + " ( " + localAddress.getHostAddress() + " )";
+                    context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
+
                     triedInterfaces++;
 
                     discoverDevices(localAddress, broadcastAddress, context);
 
                     if (milightDevices.size() > 0) {
 
-                        if (milightDevices.size() == 1) {
-
-                            /* Found one single device */
+                        /* If we've found only one single device, just connect */
+                        if (milightDevices.size() == 1)
                             setDevice(milightDevices.get(0).addrIP, context);
-
-                        } else {
-
-                            /* Found multiple */
-                            context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
-
-                        }
-
-                        context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
                         /* Stop this discovery cycle */
                         return;
@@ -132,12 +130,15 @@ public class Controller {
 
             }
 
-            /* Nothing found */
-            context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
-
         } catch (SocketException e) {
 
         }
+
+        /* DEBUG */
+        milightDevices.add(new Device("192.168.2.8", "SomeMac"));
+
+        /* Nothing found */
+        context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
 
         if (triedInterfaces == 0) {
             Log.e("BILIGHT", "No suitable IPv4 network interfaces found.");
@@ -313,7 +314,7 @@ public class Controller {
         }
 
         /* Start keepalive thread */
-        startKeepAliveThread();
+        startWorkerThread();
 
     }
 
@@ -384,7 +385,7 @@ public class Controller {
 
     }
 
-    public void startKeepAliveThread() {
+    public void startWorkerThread() {
 
         new Thread() {
 
@@ -393,8 +394,7 @@ public class Controller {
 
                 boolean keepAlive = false;
 
-                /* Timestamp of last-sent command + 5000ms */
-                long keepAliveTime = System.currentTimeMillis() + 5000;
+                long keepAliveTime = 0;
                 long wait;
 
                 int[] controlDevices;

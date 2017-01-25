@@ -18,9 +18,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.jaspergoes.bilight.ControlActivity">
-
-        </activity>
+        <activity android:name="com.jaspergoes.bilight.ControlActivity" />
 
     </application>
 

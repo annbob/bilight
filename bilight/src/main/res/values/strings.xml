@@ -12,4 +12,8 @@
     <string name="zone_4">4</string>
     <string name="zones">Zones</string>
     <string name="white">White</string>
+    <string name="help">Help</string>
+    <string name="via">via</string>
+
+    <string name="no_milight_devices_found_yet">No Milight devices found yet.</string>
 </resources>
