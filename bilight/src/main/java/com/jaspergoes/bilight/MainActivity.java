@@ -165,6 +165,7 @@ public class MainActivity extends PreferenceActivityCompat {
 
     private PreferenceCategoryCompat deviceList;
     private PreferenceCategoryCompat remoteList;
+    private PreferenceCompat addRemote;
 
     public static ArrayList<Device> remoteMilightDevices = new ArrayList<Device>();
 
@@ -196,7 +197,7 @@ public class MainActivity extends PreferenceActivityCompat {
         remoteList.setTitle(getString(R.string.remote_devices));
         root.addPreference(remoteList);
 
-        PreferenceCompat addRemote = new PreferenceCompat(this);
+        addRemote = new PreferenceCompat(this);
         addRemote.setTitle(getString(R.string.add_remote_device));
         addRemote.setSummary(getString(R.string.add_remote_device_summary));
         addRemote.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -264,6 +265,7 @@ public class MainActivity extends PreferenceActivityCompat {
         boolean maySelect = !Controller.isConnecting;
 
         findViewById(R.id.busy).setVisibility(maySelect ? View.GONE : View.VISIBLE);
+        addRemote.setEnabled(maySelect);
 
         /* Re-populate the list with discovered devices */
         for (int i = 0; i < Controller.milightDevices.size(); i++) {
@@ -276,7 +278,7 @@ public class MainActivity extends PreferenceActivityCompat {
 
         if (empty) {
             PreferenceCompat pref = new PreferenceCompat(this);
-            pref.setTitle(getString(R.string.no_milight_devices_found_yet));
+            pref.setTitle(getString(R.string.no_milight_devices_found));
             pref.setIcon(getResources().getDrawable(R.drawable.ic_bulb_grey));
             pref.setEnabled(false);
             deviceList.addPreference(pref);

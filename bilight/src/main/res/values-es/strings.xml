@@ -25,5 +25,5 @@
     <string name="white">Blanco</string>
     <string name="help">Ayuda</string>
     <string name="via">vía</string>
-    <string name="no_milight_devices_found_yet">No se han encontrado dispositivos de Milight.</string>
+    <string name="no_milight_devices_found">No se han encontrado dispositivos Milight.</string>
 </resources>
