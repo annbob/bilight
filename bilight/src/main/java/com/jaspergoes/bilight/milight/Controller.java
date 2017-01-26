@@ -484,18 +484,34 @@ public class Controller {
                         if (lastColor != newColor && newColor != -1) {
 
                             lastColor = newColor;
-                            nowWhite = false;
 
-                            for (int i : controlDevices) {
-                                if (i == 0) {
-                                    payloads.add(buildColorPayload(i, 0));
-                                } else {
-                                    for (int x : controlZones) {
-                                        payloads.add(buildColorPayload(i, x));
+                            if (!nowWhite) {
+                                nowWhite = false;
+                                byte[] payload;
+                                for (int i : controlDevices) {
+                                    if (i == 0) {
+                                        payload = buildColorPayload(i, 0);
+                                        payloads.add(payload);
+                                        payloads.add(payload);
+                                    } else {
+                                        for (int x : controlZones) {
+                                            payload = buildColorPayload(i, x);
+                                            payloads.add(payload);
+                                            payloads.add(payload);
+                                        }
+                                    }
+                                }
+                            } else {
+                                for (int i : controlDevices) {
+                                    if (i == 0) {
+                                        payloads.add(buildColorPayload(i, 0));
+                                    } else {
+                                        for (int x : controlZones) {
+                                            payloads.add(buildColorPayload(i, x));
+                                        }
                                     }
                                 }
                             }
-
                         }
 
                         if (lastBrightness != newBrightness && newBrightness != -1) {
@@ -747,8 +763,6 @@ public class Controller {
     }
 
     public void refresh() {
-
-        nowWhite = false;
 
         lastColor = Integer.MAX_VALUE;
         lastBrightness = Integer.MAX_VALUE;
