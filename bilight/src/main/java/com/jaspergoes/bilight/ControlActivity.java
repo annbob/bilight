@@ -91,6 +91,10 @@ public class ControlActivity extends AppCompatActivity {
             }
         });
 
+        /* Audio analyzer | just trying out some stuff */
+        //MicrophoneAnalyzer mic = new MicrophoneAnalyzer();
+        //mic.startRecording();
+
         /* Color */
         TypedArray array = getTheme().obtainStyledAttributes(new int[]{android.R.attr.colorBackground});
         int backgroundColor = array.getColor(0, 0xFFFFFF);
@@ -126,7 +130,7 @@ public class ControlActivity extends AppCompatActivity {
 
         /* Brightness */
         seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_brightness);
-        seekbar.setProgress(Controller.newColor == -1 ? 100 : Controller.newBrightness);
+        seekbar.setProgress(Controller.newBrightness == -1 ? 100 : Controller.newBrightness);
         seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
 
             @Override
@@ -153,6 +157,26 @@ public class ControlActivity extends AppCompatActivity {
             public void onProgressChanged(DiscreteSeekBar seekBar, final int value, boolean fromUser) {
 
                 if (fromUser && Controller.newSaturation != (Controller.newSaturation = 100 - value)) {
+
+                    synchronized (Controller.INSTANCE) {
+                        Controller.INSTANCE.notify();
+                    }
+
+                }
+
+            }
+
+        });
+
+        /* Temperature */
+        seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_colortemp);
+        seekbar.setProgress(Controller.newTemperature == -1 ? 100 : 100 - Controller.newTemperature);
+        seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
+
+            @Override
+            public void onProgressChanged(DiscreteSeekBar seekBar, final int value, boolean fromUser) {
+
+                if (fromUser && Controller.newTemperature != (Controller.newTemperature = 100 - value)) {
 
                     synchronized (Controller.INSTANCE) {
                         Controller.INSTANCE.notify();

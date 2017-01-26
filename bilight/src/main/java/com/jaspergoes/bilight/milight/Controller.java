@@ -71,15 +71,20 @@ public class Controller {
     /* Whether we are connected */
     private volatile static boolean isConnected;
 
+    /* Whether the lamps are in WHITE mode */
+    private static boolean nowWhite = false;
+
     /* New color, brightness and saturation values to be submitted */
     public volatile static int newColor = -1;
     public volatile static int newBrightness = -1;
     public volatile static int newSaturation = -1;
+    public volatile static int newTemperature = -1;
 
     /* Last color, brightness and saturation values sent out */
     private static int lastColor = Integer.MAX_VALUE;
     private static int lastBrightness = Integer.MAX_VALUE;
     private static int lastSaturation = Integer.MAX_VALUE;
+    private static int lastTemperature = Integer.MAX_VALUE;
 
     /* Name of the network interface in use */
     public volatile static String networkInterfaceName = "";
@@ -479,6 +484,7 @@ public class Controller {
                         if (lastColor != newColor && newColor != -1) {
 
                             lastColor = newColor;
+                            nowWhite = false;
 
                             for (int i : controlDevices) {
                                 if (i == 0) {
@@ -514,6 +520,24 @@ public class Controller {
 
                             for (int x : controlZones) {
                                 payloads.add(buildSaturationPayload(x));
+                            }
+
+                        }
+
+                        if (lastTemperature != newTemperature && newTemperature != -1) {
+
+                            lastTemperature = newTemperature;
+
+                            if (!nowWhite) {
+
+                                setWhite();
+
+                            } else {
+
+                                for (int x : controlZones) {
+                                    payloads.add(buildWhitePayload(8, x));
+                                }
+
                             }
 
                         }
@@ -640,6 +664,8 @@ public class Controller {
 
         /* We'll just send each command for white two times */
 
+        nowWhite = true;
+
         int[] controlDevices = Controller.controlDevices;
         int[] controlZones = Controller.controlZones;
 
@@ -666,7 +692,7 @@ public class Controller {
 
     private byte[] buildWhitePayload(int group, int milightZone) {
 
-        byte[] payload = new byte[]{(byte) 128, (byte) 0, (byte) 0, (byte) 0, (byte) 17, milightSessionByte1, milightSessionByte2, (byte) 0, (byte) (-128 + noOnce), (byte) 0, (byte) 49, milightPasswordByte1, milightPasswordByte2, (byte) group, (byte) (group == 8 ? 5 : 3), (byte) (group == 8 ? 100 : 5), (byte) 0, (byte) 0, (byte) 0, (byte) (group == 0 ? 0 : milightZone), (byte) 0, (byte) 0};
+        byte[] payload = new byte[]{(byte) 128, (byte) 0, (byte) 0, (byte) 0, (byte) 17, milightSessionByte1, milightSessionByte2, (byte) 0, (byte) (-128 + noOnce), (byte) 0, (byte) 49, milightPasswordByte1, milightPasswordByte2, (byte) group, (byte) (group == 8 ? 5 : 3), (byte) (group == 8 ? (newTemperature != -1 ? newTemperature : 0) : 5), (byte) 0, (byte) 0, (byte) 0, (byte) (group == 0 ? 0 : milightZone), (byte) 0, (byte) 0};
 
 		/* Checksum */
         payload[21] = (byte) ((char) (0xFF & payload[10]) + (char) (0xFF & payload[11]) + (char) (0xFF & payload[12]) + (char) (0xFF & payload[13]) + (char) (0xFF & payload[14]) + (char) (0xFF & payload[15]) + (char) (0xFF & payload[16]) + (char) (0xFF & payload[17]) + (char) (0xFF & payload[18]) + (char) (0xFF & payload[19]) + (char) (0xFF & payload[20]));
@@ -721,6 +747,8 @@ public class Controller {
     }
 
     public void refresh() {
+
+        nowWhite = false;
 
         lastColor = Integer.MAX_VALUE;
         lastBrightness = Integer.MAX_VALUE;
