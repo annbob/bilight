@@ -485,7 +485,7 @@ public class Controller {
 
                             lastColor = newColor;
 
-                            if (!nowWhite) {
+                            if (nowWhite) {
                                 nowWhite = false;
                                 byte[] payload;
                                 for (int i : controlDevices) {
