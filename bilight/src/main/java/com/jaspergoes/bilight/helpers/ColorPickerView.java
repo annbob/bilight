@@ -31,6 +31,7 @@ public class ColorPickerView extends View {
     private int CENTER;
     private int CENTER_RADIUS;
     private int MAX_HEIGHT = 0;
+    private int BACKCOLOR = 0xffffffff;
 
     private static int color = 0xffff0000;
 
@@ -76,7 +77,7 @@ public class ColorPickerView extends View {
 
         int c = mCenterPaint.getColor();
         mCenterPaint.setStyle(Paint.Style.STROKE);
-        mCenterPaint.setColor(0xffffffff);
+        mCenterPaint.setColor(BACKCOLOR);
         canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
 
         if (mTrackingCenter) {
@@ -193,6 +194,13 @@ public class ColorPickerView extends View {
 
     public void setOnColorChangeListener(OnColorChangeListener listener) {
         mListener = listener;
+    }
+
+    public void setParentBackground(int color) {
+        if (color != 0) {
+            BACKCOLOR = color;
+            invalidate();
+        }
     }
 
     private int ave(int s, int d, float p) {

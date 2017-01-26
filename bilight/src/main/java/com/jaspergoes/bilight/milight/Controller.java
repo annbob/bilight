@@ -283,7 +283,10 @@ public class Controller {
             milightAddress = InetAddress.getByName(address);
             milightPort = port;
         } catch (UnknownHostException e) {
-            /* This should never happen. Nasty empty catch blocks, I should know better. Oh, right, I do. */
+            Log.e("BILIGHT", "INVALID HOST");
+            isConnecting = false;
+            context.sendBroadcast(new Intent(Constants.BILIGHT_DISCOVERED_DEVICES_CHANGED));
+            return;
         }
 
         byte[] payload = new byte[]{(byte) 32, (byte) 0, (byte) 0, (byte) 0, (byte) 22, (byte) 2, (byte) 98, (byte) 58, (byte) 213, (byte) 237, (byte) 163, (byte) 1, (byte) 174, (byte) 8, (byte) 45, (byte) 70, (byte) 97, (byte) 65, (byte) 167, (byte) 246, (byte) 220, (byte) 175, (byte) 211, (byte) 230, (byte) 0, (byte) 0, (byte) 30};
@@ -567,8 +570,6 @@ public class Controller {
 
                 }
 
-                Log.e("BILIGHT", "THREAD DIED NATURALLY");
-
             }
 
         }.start();
@@ -637,17 +638,24 @@ public class Controller {
 
     public void setWhite() {
 
+        /* We'll just send each command for white two times */
+
         int[] controlDevices = Controller.controlDevices;
         int[] controlZones = Controller.controlZones;
 
         ArrayList<byte[]> payloads = new ArrayList<byte[]>();
+        byte[] payload;
 
         for (int i : controlDevices) {
             if (i == 0) {
-                payloads.add(buildWhitePayload(i, 0));
+                payload = buildWhitePayload(i, 0);
+                payloads.add(payload);
+                payloads.add(payload);
             } else {
                 for (int x : controlZones) {
-                    payloads.add(buildWhitePayload(i, x));
+                    payload = buildWhitePayload(i, x);
+                    payloads.add(payload);
+                    payloads.add(payload);
                 }
             }
         }
@@ -672,17 +680,24 @@ public class Controller {
 
     public void setOnOff(boolean onOff) {
 
+        /* We'll just send each command for on/off two times */
+
         int[] controlDevices = Controller.controlDevices;
         int[] controlZones = Controller.controlZones;
 
         ArrayList<byte[]> payloads = new ArrayList<byte[]>();
+        byte[] payload;
 
         for (int i : controlDevices) {
             if (i == 0) {
-                payloads.add(buildSwitchPayload(i, 0, onOff));
+                payload = buildSwitchPayload(i, 0, onOff);
+                payloads.add(payload);
+                payloads.add(payload);
             } else {
                 for (int x : controlZones) {
-                    payloads.add(buildSwitchPayload(i, x, onOff));
+                    payload = buildSwitchPayload(i, x, onOff);
+                    payloads.add(payload);
+                    payloads.add(payload);
                 }
             }
         }

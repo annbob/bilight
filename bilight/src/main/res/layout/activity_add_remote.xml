@@ -44,6 +44,14 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:id="@+id/ip_local_warn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/ip_local_warn"
+                android:textColor="#ff0000" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/port" />

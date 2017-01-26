@@ -1,5 +1,6 @@
 package com.jaspergoes.bilight;
 
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -91,7 +92,13 @@ public class ControlActivity extends AppCompatActivity {
         });
 
         /* Color */
-        ((ColorPickerView) findViewById(R.id.colorpicker)).setOnColorChangeListener(new OnColorChangeListener() {
+        TypedArray array = getTheme().obtainStyledAttributes(new int[]{android.R.attr.colorBackground});
+        int backgroundColor = array.getColor(0, 0xFFFFFF);
+        array.recycle();
+
+        ColorPickerView colorPicker = (ColorPickerView) findViewById(R.id.colorpicker);
+        colorPicker.setParentBackground(backgroundColor);
+        colorPicker.setOnColorChangeListener(new OnColorChangeListener() {
 
             @Override
             public void colorChanged(final int color) {
@@ -119,7 +126,7 @@ public class ControlActivity extends AppCompatActivity {
 
         /* Brightness */
         seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_brightness);
-        seekbar.setProgress(Controller.newColor == -1 ? 100 : Controller.newColor);
+        seekbar.setProgress(Controller.newColor == -1 ? 100 : Controller.newBrightness);
         seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
 
             @Override
@@ -139,7 +146,7 @@ public class ControlActivity extends AppCompatActivity {
 
         /* Saturation */
         seekbar = (DiscreteSeekBar) findViewById(R.id.seekbar_saturation);
-        seekbar.setProgress(Controller.newSaturation == -1 ? 100 : Controller.newSaturation);
+        seekbar.setProgress(Controller.newSaturation == -1 ? 100 : 100 - Controller.newSaturation);
         seekbar.setOnProgressChangeListener(new OnProgressChangeListener() {
 
             @Override
