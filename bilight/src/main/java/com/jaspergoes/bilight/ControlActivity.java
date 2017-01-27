@@ -12,6 +12,7 @@ import android.widget.CompoundButton;
 import com.jaspergoes.bilight.helpers.ColorPickerView;
 import com.jaspergoes.bilight.helpers.OnColorChangeListener;
 import com.jaspergoes.bilight.helpers.OnProgressChangeListener;
+import com.jaspergoes.bilight.helpers.ScrollViewPlus;
 import com.jaspergoes.bilight.milight.Controller;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
@@ -27,6 +28,12 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_control);
+
+        /* Expect this value to be null after some time - Thread will eventually be terminated, of course. Should be done nicer than this, but whatever. */
+        if (Controller.milightAddress == null) {
+            finish();
+            return;
+        }
 
         Toolbar supportActionBar = (Toolbar) findViewById(R.id.toolbar);
         supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + (Controller.milightPort != Controller.defaultMilightPort ? ":" + Integer.toString(Controller.milightPort) : "") + (Controller.networkInterfaceName.length() > 0 ? " " + getString(R.string.via) + " " + Controller.networkInterfaceName : ""));
@@ -101,6 +108,7 @@ public class ControlActivity extends AppCompatActivity {
         array.recycle();
 
         ColorPickerView colorPicker = (ColorPickerView) findViewById(R.id.colorpicker);
+        colorPicker.setScrollingParent((ScrollViewPlus) findViewById(R.id.scrollcontent));
         colorPicker.setParentBackground(backgroundColor);
         colorPicker.setOnColorChangeListener(new OnColorChangeListener() {
 

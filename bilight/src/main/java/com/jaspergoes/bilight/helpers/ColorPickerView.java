@@ -32,6 +32,7 @@ public class ColorPickerView extends View {
     private int CENTER_RADIUS;
     private int MAX_HEIGHT = 0;
     private int BACKCOLOR = 0xffffffff;
+    private ScrollViewPlus scrollParent;
 
     private static int color = 0xffff0000;
 
@@ -148,6 +149,7 @@ public class ColorPickerView extends View {
             case MotionEvent.ACTION_DOWN:
                 if (onPainting) {
                     mTracking = true;
+                    scrollParent.setScrollingEnabled(false);
                     mTrackingCenter = inCenter;
                     if (inCenter) {
                         mHighlightCenter = true;
@@ -182,6 +184,7 @@ public class ColorPickerView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 mTracking = false;
+                scrollParent.setScrollingEnabled(true);
                 if (mTrackingCenter) {
                     if (inCenter) mListener.refresh();
                     mTrackingCenter = false;    // so we draw w/o halo
@@ -194,6 +197,10 @@ public class ColorPickerView extends View {
 
     public void setOnColorChangeListener(OnColorChangeListener listener) {
         mListener = listener;
+    }
+
+    public void setScrollingParent(ScrollViewPlus scrollParent) {
+        this.scrollParent = scrollParent;
     }
 
     public void setParentBackground(int color) {

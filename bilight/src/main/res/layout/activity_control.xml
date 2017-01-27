@@ -14,12 +14,12 @@
         android:background="@color/colorPrimary"
         android:theme="@style/ToolBar" />
 
-    <ScrollView
+    <com.jaspergoes.bilight.helpers.ScrollViewPlus
+        android:id="@+id/scrollcontent"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
         <LinearLayout
-            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -192,9 +192,8 @@
 
             </LinearLayout>
 
-
         </LinearLayout>
 
-    </ScrollView>
+    </com.jaspergoes.bilight.helpers.ScrollViewPlus>
 
 </LinearLayout>
