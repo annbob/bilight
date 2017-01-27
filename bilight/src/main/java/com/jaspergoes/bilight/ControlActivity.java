@@ -27,13 +27,13 @@ public class ControlActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_control);
-
         /* Expect this value to be null after some time - Thread will eventually be terminated, of course. Should be done nicer than this, but whatever. */
         if (Controller.milightAddress == null) {
             finish();
             return;
         }
+
+        setContentView(R.layout.activity_control);
 
         Toolbar supportActionBar = (Toolbar) findViewById(R.id.toolbar);
         supportActionBar.setSubtitle(Controller.milightAddress.getHostAddress() + (Controller.milightPort != Controller.defaultMilightPort ? ":" + Integer.toString(Controller.milightPort) : "") + (Controller.networkInterfaceName.length() > 0 ? " " + getString(R.string.via) + " " + Controller.networkInterfaceName : ""));

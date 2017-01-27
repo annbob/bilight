@@ -124,21 +124,24 @@ public class MainActivity extends PreferenceActivityCompat {
 
         @Override
         public boolean onLongClick(View view) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            try {
-                JSONArray newArray = new JSONArray();
-                JSONArray remoteArray = new JSONArray(prefs.getString("remotes", "[]"));
-                for (int i = 0; i < remoteArray.length(); i++) {
-                    if (i != index) {
-                        newArray.put(remoteArray.getJSONObject(i));
+            if (this.isEnabled() && !Controller.isConnecting) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                try {
+                    JSONArray newArray = new JSONArray();
+                    JSONArray remoteArray = new JSONArray(prefs.getString("remotes", "[]"));
+                    for (int i = 0; i < remoteArray.length(); i++) {
+                        if (i != index) {
+                            newArray.put(remoteArray.getJSONObject(i));
+                        }
                     }
+                    prefs.edit().putString("remotes", newArray.toString()).apply();
+                } catch (JSONException e) {
+                    prefs.edit().putString("remotes", "[]").apply();
                 }
-                prefs.edit().putString("remotes", newArray.toString()).apply();
-            } catch (JSONException e) {
-                prefs.edit().putString("remotes", "[]").apply();
+                updateList();
+                return true;
             }
-            updateList();
-            return true;
+            return false;
         }
     }
 
